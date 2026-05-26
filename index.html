@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🚀 Space Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cyan:#00d4ff;--purple:#a78bfa;--green:#34d399;--orange:#fb923c;
+  --red:#f87171;--yellow:#fbbf24;--dark:#030008;
+}
+html,body{width:100%;height:100%;overflow:hidden}
+body{font-family:'Share Tech Mono',monospace;background:var(--dark);color:#e2e8f0;touch-action:manipulation}
+
+/* STARS */
+#stars{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--d,2s) ease-in-out infinite alternate}
+@keyframes twinkle{0%{opacity:.1;transform:scale(.6)}100%{opacity:1;transform:scale(1.4)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+@keyframes floatY{0%{transform:translateY(0) rotate(0deg)}100%{transform:translateY(-20px) rotate(14deg)}}
+@keyframes bounce3{0%{transform:translateY(0)}100%{transform:translateY(-10px)}}
+@keyframes spinGlobe{from{transform:rotateY(0deg)}to{transform:rotateY(360deg)}}
+@keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
+@keyframes ringRotate{from{transform:rotateX(75deg) rotateZ(0deg)}to{transform:rotateX(75deg) rotateZ(360deg)}}
+
+/* PAGES */
+.page{display:none;position:fixed;inset:0;z-index:1;flex-direction:column;overflow:hidden}
+.page.active{display:flex;animation:fadeUp .3s ease}
+
+/* ── HOME ── */
+#home{align-items:center;justify-content:center;text-align:center;padding:1.5rem;gap:.4rem}
+.home-rocket{font-size:5rem;animation:floatY 3s ease-in-out infinite alternate;filter:drop-shadow(0 0 30px rgba(0,212,255,.9))}
+.site-title{font-family:'Orbitron',monospace;font-size:clamp(1.8rem,8vw,3.5rem);font-weight:900;
+  background:linear-gradient(135deg,#00d4ff,#fff 50%,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  letter-spacing:.1em;line-height:1.1}
+.site-sub{color:#475569;font-size:.75rem;letter-spacing:.5em;text-transform:uppercase;margin-top:.2rem}
+.nav-btns{display:flex;flex-direction:column;gap:.9rem;width:100%;max-width:280px;margin-top:2rem}
+.nav-btn{padding:.9rem 1.5rem;border-radius:50px;border:2px solid;background:rgba(0,0,0,.6);
+  font-size:.95rem;font-family:'Orbitron',monospace;font-weight:700;cursor:pointer;
+  letter-spacing:.08em;backdrop-filter:blur(14px);transition:all .25s;display:flex;align-items:center;gap:.8rem;
+  -webkit-tap-highlight-color:transparent}
+.nav-btn:active{transform:scale(.97)}
+.nav-btn.game{color:var(--cyan);border-color:var(--cyan);box-shadow:0 0 25px rgba(0,212,255,.4)}
+.nav-btn.planets{color:var(--purple);border-color:var(--purple);box-shadow:0 0 25px rgba(167,139,250,.4)}
+.nav-btn.ai{color:var(--green);border-color:var(--green);box-shadow:0 0 25px rgba(52,211,153,.4)}
+.fi{position:fixed;opacity:.2;animation:floatY var(--d,4s) ease-in-out infinite alternate;font-size:1.5rem;pointer-events:none;z-index:0}
+
+/* HEADER */
+.page-header{display:flex;align-items:center;gap:.6rem;padding:.75rem 1rem;flex-shrink:0;z-index:10}
+.page-title{font-family:'Orbitron',monospace;font-size:1rem;font-weight:700;flex:1;
+  background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.back-btn{padding:.4rem .9rem;border-radius:50px;border:1px solid #334155;background:rgba(0,0,0,.6);
+  color:#94a3b8;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.78rem;
+  backdrop-filter:blur(10px);transition:all .2s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+
+/* ── GAME PAGE ── */
+#game{background:linear-gradient(180deg,#020010 0%,#050008 100%)}
+#gameCanvas{display:block;max-width:100%;touch-action:none}
+.game-hud{display:flex;gap:1.2rem;padding:.2rem 1rem;font-size:.78rem;color:#94a3b8;flex-shrink:0}
+.gi{display:flex;align-items:center;gap:.3rem}
+.ctrl-row{display:flex;gap:.8rem;padding:.6rem 1rem;align-items:center;justify-content:center;flex-shrink:0}
+.ctrl-btn{border-radius:50%;border:2px solid;background:rgba(0,0,0,.7);
+  cursor:pointer;user-select:none;-webkit-user-select:none;display:flex;align-items:center;
+  justify-content:center;flex-direction:column;backdrop-filter:blur(12px);
+  -webkit-tap-highlight-color:transparent;transition:transform .1s,opacity .1s;touch-action:none}
+.ctrl-btn:active{transform:scale(.9);opacity:.8}
+.ctrl-lr{width:68px;height:68px;border-color:#c1440e;color:#ff7744;font-size:1.6rem;
+  box-shadow:0 0 18px rgba(193,68,14,.5)}
+.ctrl-jump{width:82px;height:82px;border-color:#60a5fa;color:#60a5fa;
+  background:rgba(96,165,250,.15);box-shadow:0 0 28px rgba(96,165,250,.6);gap:1px}
+.ctrl-jump .jico{font-size:1.4rem}
+.ctrl-jump .jlbl{font-size:.52rem;letter-spacing:.1em}
+.game-hints{display:flex;gap:.8rem;padding:.2rem 1rem;color:#5a3a2a;font-size:.7rem;flex-wrap:wrap;justify-content:center;flex-shrink:0}
+
+/* ── PLANETS PAGE ── */
+#planets{background:linear-gradient(180deg,#030012 0%,#050008 100%)}
+#planetsContent{flex:1;overflow-y:auto;overflow-x:hidden}
+#planetsContent::-webkit-scrollbar{width:3px}
+#planetsContent::-webkit-scrollbar-thumb{background:#7c3aed;border-radius:2px}
+.planets-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:.8rem;padding:.75rem}
+.planet-card{background:rgba(255,255,255,.05);border:2px solid;border-radius:16px;padding:1rem .75rem;
+  cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:.6rem;
+  transition:all .3s;-webkit-tap-highlight-color:transparent}
+.planet-card:active{transform:scale(.96)}
+.planet-name{font-family:'Orbitron',monospace;font-size:.65rem;font-weight:700;color:#e2e8f0;text-align:center}
+
+/* 3D PLANET SPHERE */
+.planet-3d-wrap{position:relative;display:flex;align-items:center;justify-content:center}
+.planet-sphere{border-radius:50%;position:relative;overflow:hidden;flex-shrink:0}
+.planet-sphere::before{content:'';position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.45) 0%,transparent 55%);
+  z-index:2;pointer-events:none}
+.planet-sphere::after{content:'';position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle at 75% 75%,rgba(0,0,0,.6) 0%,transparent 50%);
+  z-index:2;pointer-events:none}
+.planet-surface{position:absolute;inset:0;border-radius:50%;animation:spinGlobe var(--spin,20s) linear infinite}
+/* Rings */
+.ring-wrap{position:absolute;width:160%;height:160%;left:-30%;top:-30%;
+  pointer-events:none;z-index:3;transform-style:preserve-3d}
+.ring-disk{position:absolute;width:100%;height:100%;border-radius:50%;
+  transform:rotateX(75deg);border:solid;border-color:rgba(253,230,138,.7)}
+
+/* PLANET DETAIL */
+.planet-detail{padding:1rem;animation:fadeUp .3s ease}
+.pd-3d-hero{display:flex;align-items:center;justify-content:center;padding:1.5rem 0 1rem;position:relative}
+.pd-name{font-family:'Orbitron',monospace;font-size:1.5rem;font-weight:700;text-align:center;margin-bottom:1rem;
+  background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.pd-stats{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin:0 .25rem 1rem}
+.stat-box{background:rgba(255,255,255,.06);border-radius:10px;padding:.6rem;border:1px solid rgba(255,255,255,.1)}
+.stat-label{color:#64748b;font-size:.6rem;margin-bottom:.2rem;text-transform:uppercase}
+.stat-val{color:#e2e8f0;font-size:.78rem;font-weight:700}
+.planet-fact{border-radius:12px;padding:.85rem;color:#cbd5e1;font-size:.78rem;line-height:1.75;margin:0 .25rem}
+.pd-back-btn{display:block;margin:.85rem auto 0;padding:.45rem 1.2rem;border-radius:50px;border:1px solid;
+  background:rgba(0,0,0,.5);cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.78rem;
+  -webkit-tap-highlight-color:transparent}
+
+/* ── AI PAGE ── */
+#ai{background:linear-gradient(180deg,#030012 0%,#050008 100%)}
+.ai-inner{display:flex;flex-direction:column;flex:1;min-height:0;padding:.25rem .75rem .5rem}
+.messages{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:.65rem;padding:.2rem .1rem;scroll-behavior:smooth}
+.messages::-webkit-scrollbar{width:3px}
+.messages::-webkit-scrollbar-thumb{background:#7c3aed;border-radius:2px}
+.msg-row{display:flex;align-items:flex-end;gap:.45rem}
+.msg-row.user{justify-content:flex-end}
+.msg-row.ai-row{justify-content:flex-start}
+.avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
+.av-ai{background:linear-gradient(135deg,#1d4ed8,#7c3aed)}
+.av-user{background:linear-gradient(135deg,#0ea5e9,#6366f1)}
+.bubble{max-width:80%;border-radius:16px;padding:.75rem .95rem;font-size:.8rem;line-height:1.75;
+  white-space:pre-wrap;word-break:break-word;backdrop-filter:blur(16px)}
+.bubble.ai-b{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
+  border-radius:16px 16px 16px 4px;color:#e2e8f0}
+.bubble.user-b{background:linear-gradient(135deg,rgba(29,78,216,.85),rgba(124,58,237,.85));
+  border:1px solid rgba(147,197,253,.3);border-radius:16px 16px 4px 16px;color:#f0f9ff}
+.typing-dots{display:flex;gap:.4rem;align-items:center;padding:.65rem .85rem;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:16px 16px 16px 4px}
+.dot{width:6px;height:6px;border-radius:50%;background:#7c3aed;animation:bounce3 .55s ease-in-out infinite alternate}
+.dot:nth-child(2){animation-delay:.14s}.dot:nth-child(3){animation-delay:.28s}
+.chips{display:flex;gap:.3rem;overflow-x:auto;padding:.2rem 0;flex-shrink:0}
+.chips::-webkit-scrollbar{height:0}
+.chip{white-space:nowrap;padding:.25rem .6rem;border-radius:50px;border:1px solid rgba(167,139,250,.4);
+  background:rgba(167,139,250,.1);color:var(--purple);cursor:pointer;font-family:'Share Tech Mono',monospace;
+  font-size:.67rem;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.ai-input-row{display:flex;gap:.5rem;flex-shrink:0;padding-top:.35rem}
+.ai-input{flex:1;padding:.68rem .95rem;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);
+  border-radius:50px;color:#e2e8f0;font-family:'Share Tech Mono',monospace;font-size:.85rem;outline:none}
+.ai-input::placeholder{color:#475569}
+.send-btn{padding:.68rem 1rem;border-radius:50px;border:none;background:linear-gradient(135deg,#1d4ed8,#7c3aed);
+  color:#fff;cursor:pointer;font-size:1rem;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.send-btn:disabled{background:rgba(55,65,81,.6);cursor:not-allowed}
+.lang-wrap{position:relative}
+.lang-btn{padding:.35rem .65rem;border-radius:50px;border:1px solid var(--green);
+  background:rgba(52,211,153,.1);color:var(--green);cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:.7rem}
+.lang-menu{position:absolute;right:0;top:110%;background:rgba(6,2,18,.97);backdrop-filter:blur(20px);
+  border:1px solid var(--green);border-radius:12px;padding:.4rem;z-index:200;min-width:160px;
+  max-height:240px;overflow-y:auto;box-shadow:0 0 20px rgba(52,211,153,.3);display:none}
+.lang-menu.open{display:block}
+.lang-menu::-webkit-scrollbar{width:2px}
+.lang-opt{display:block;width:100%;padding:.4rem .65rem;border-radius:8px;border:none;
+  background:transparent;color:#cbd5e1;cursor:pointer;text-align:left;font-family:'Share Tech Mono',monospace;font-size:.72rem}
+.lang-opt:hover,.lang-opt.sel{background:rgba(52,211,153,.2);color:var(--green)}
+.lang-hint{background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.2);border-radius:8px;
+  padding:.3rem .65rem;color:#6ee7b7;font-size:.65rem;flex-shrink:0;margin-bottom:.25rem}
+
+/* MUSIC */
+#musicBtn{position:fixed;bottom:12px;right:12px;z-index:999;width:44px;height:44px;border-radius:50%;
+  border:2px solid #334155;background:rgba(0,0,0,.7);color:#64748b;font-size:1.2rem;cursor:pointer;
+  backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;
+  -webkit-tap-highlight-color:transparent;transition:all .3s}
+#musicBtn.on{border-color:var(--purple);color:var(--purple);box-shadow:0 0 18px rgba(167,139,250,.5)}
+</style>
+</head>
+<body>
+
+<div id="stars"></div>
+<button id="musicBtn" onclick="toggleMusic()">🔇</button>
+
+<!-- HOME -->
+<div class="page active" id="home">
+  <span class="fi" style="left:7%;top:10%;--d:3.2s">💫</span>
+  <span class="fi" style="left:30%;top:68%;--d:4.6s">⭐</span>
+  <span class="fi" style="left:68%;top:8%;--d:5.1s">🌟</span>
+  <span class="fi" style="left:88%;top:70%;--d:3.8s">✨</span>
+  <span class="fi" style="left:18%;top:42%;--d:6s">🛸</span>
+  <span class="fi" style="left:78%;top:38%;--d:4.2s">☄️</span>
+  <div class="home-rocket">🚀</div>
+  <h1 class="site-title">SPACE EXPLORER</h1>
+  <p class="site-sub">Navigate the Cosmos</p>
+  <div class="nav-btns">
+    <button class="nav-btn game" onclick="showPage('game')"><span>🎮</span><span>Play Game</span></button>
+    <button class="nav-btn planets" onclick="showPage('planets')"><span>🪐</span><span>View Planets</span></button>
+    <button class="nav-btn ai" onclick="showPage('ai')"><span>🤖</span><span>Ask COSMO AI</span></button>
+  </div>
+</div>
+
+<!-- GAME -->
+<div class="page" id="game">
+  <div class="page-header">
+    <button class="back-btn" onclick="showPage('home')">← Back</button>
+    <span class="page-title">🚗 Mars Racer</span>
+    <button class="back-btn" style="border-color:var(--yellow);color:var(--yellow)" onclick="restartGame()">↺ Restart</button>
+  </div>
+  <div class="game-hud">
+    <span class="gi">🏆 <span id="scoreDisplay">0</span></span>
+    <span class="gi">⛽ <span id="fuelBar">████████████</span> <span id="fuelPct">100</span>%</span>
+    <span class="gi">❤️ <span id="livesDisplay">3</span></span>
+  </div>
+  <canvas id="gameCanvas"></canvas>
+  <div class="ctrl-row">
+    <button class="ctrl-btn ctrl-lr" id="btnL">◀</button>
+    <button class="ctrl-btn ctrl-jump" id="btnJump"><span class="jico">▲</span><span class="jlbl">JUMP</span></button>
+    <button class="ctrl-btn ctrl-lr" id="btnR">▶</button>
+  </div>
+  <div class="game-hints">
+    <span>🍕🍔 Food=Points</span><span>⛽ Fuel=Refuel</span><span>🪨 Rock=Crash</span>
+  </div>
+</div>
+
+<!-- PLANETS -->
+<div class="page" id="planets">
+  <div class="page-header">
+    <button class="back-btn" id="planetBackBtn" onclick="planetBack()">← Back</button>
+    <span class="page-title" id="planetsTitle">🪐 Solar System</span>
+  </div>
+  <div id="planetsContent"></div>
+</div>
+
+<!-- AI -->
+<div class="page" id="ai">
+  <div class="page-header" style="padding-bottom:.15rem">
+    <button class="back-btn" onclick="showPage('home')">← Back</button>
+    <span class="page-title">🤖 COSMO AI</span>
+    <div class="lang-wrap">
+      <button class="lang-btn" id="langToggle" onclick="toggleLangMenu()">🌐 Auto ▾</button>
+      <div class="lang-menu" id="langMenu"></div>
+    </div>
+  </div>
+  <div class="ai-inner">
+    <div class="lang-hint" id="langHint">🌐 Auto: AI aapki language detect karke reply karega</div>
+    <div class="messages" id="messages"></div>
+    <div class="chips" id="chips"></div>
+    <div class="ai-input-row">
+      <input class="ai-input" id="aiInput" placeholder="Kuch bhi poochho..."
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}">
+      <button class="send-btn" id="sendBtn" onclick="sendMsg()">🚀</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════
+// STARS
+// ═══════════════════════════════════════
+(function(){
+  const c=document.getElementById('stars');
+  for(let i=0;i<200;i++){
+    const d=document.createElement('div'),r=Math.random()*1.8+.3;
+    d.className='star';
+    d.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;width:${r*2}px;height:${r*2}px;--d:${(Math.random()*3+1.5).toFixed(1)}s;animation-delay:${(Math.random()*4).toFixed(1)}s`;
+    c.appendChild(d);
+  }
+})();
+
+// ═══════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════
+let currentPage='home';
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  currentPage=id;
+  if(id==='game') initGame();
+  if(id==='planets'){selectedPlanet=null;renderPlanets();}
+  if(id==='ai') initAI();
+}
+
+// ═══════════════════════════════════════
+// MUSIC
+// ═══════════════════════════════════════
+let audioCtx=null,masterGain=null,musicOn=false,beatTimer=null,beatIdx=0;
+function initAudio(){
+  if(audioCtx)return;
+  audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  masterGain=audioCtx.createGain();masterGain.gain.value=.14;
+  masterGain.connect(audioCtx.destination);
+}
+function tone(f,tp,t,dur,v=.3){
+  if(!audioCtx)return;
+  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.type=tp;o.frequency.setValueAtTime(f,t);
+  g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);
+  o.connect(g);g.connect(masterGain);o.start(t);o.stop(t+dur+.01);
+}
+function playBeat(){
+  if(!audioCtx||!musicOn)return;
+  const now=audioCtx.currentTime,s=60/126,b=beatIdx%16;
+  const bass=[110,110,138,110,98,98,130,110,110,110,138,110,116,116,130,116];
+  const mel=[440,0,550,0,494,0,440,660,0,550,0,494,440,0,523,0];
+  if([0,4,8,12].includes(b)){tone(75,'sine',now,.22,.75);tone(44,'sine',now,.26,.45);}
+  if([4,12].includes(b))tone(190,'sawtooth',now,.08,.14);
+  tone(bass[b],'sawtooth',now,s*.75,.18);
+  if(mel[b])tone(mel[b],'sine',now,s*.38,.09);
+  tone(7000+Math.random()*2000,'square',now,.035,.035);
+  beatIdx++;beatTimer=setTimeout(playBeat,60000/126);
+}
+function sfx(type){
+  initAudio();if(audioCtx.state==='suspended')audioCtx.resume();
+  const n=audioCtx.currentTime;
+  if(type==='collect'){tone(880,'sine',n,.07,.28);tone(1100,'sine',n+.05,.07,.18);tone(1320,'sine',n+.1,.09,.2);}
+  else if(type==='fuel'){tone(330,'sine',n,.14,.28);tone(550,'sine',n+.1,.14,.22);}
+  else if(type==='jump'){tone(240,'sine',n,.02,.22);tone(480,'sine',n+.04,.08,.16);}
+  else if(type==='crash'){tone(180,'sawtooth',n,.35,.45);tone(75,'sine',n+.08,.35,.38);}
+  else if(type==='land'){tone(120,'sine',n,.05,.1);}
+}
+function toggleMusic(){
+  initAudio();if(audioCtx.state==='suspended')audioCtx.resume();
+  const btn=document.getElementById('musicBtn');
+  if(musicOn){musicOn=false;clearTimeout(beatTimer);btn.textContent='🔇';btn.classList.remove('on');}
+  else{musicOn=true;beatIdx=0;playBeat();btn.textContent='🎵';btn.classList.add('on');}
+}
+
+// ═══════════════════════════════════════════════════════
+// GAME ENGINE — Fixed physics, detailed car & terrain
+// ═══════════════════════════════════════════════════════
+const FOODS=['🍕','🍔','🌮','🍩','🍪','🍎','🍇','🍦','🧁','🍫','🌯','🥪'];
+// Car dimensions
+const CAR_W=82,CAR_H=28,WHEEL_R=13,AXLE_Y=8;
+// Physics tuned so car sits ON ground properly
+const GRAVITY=0.45,MAX_VY=15,JUMP_VY=-11,MOVE_ACC=0.7,FRICTION=0.84,MAX_VX=8;
+
+let gs=null,gameRaf=null,gameInited=false,gCtx=null,gCvs=null,GW=0,GH=0;
+let keysDown={};
+
+function initGame(){
+  if(gameInited)return;
+  gameInited=true;
+  gCvs=document.getElementById('gameCanvas');
+  GW=Math.min(window.innerWidth-0,600);GH=Math.floor(GW*(400/600));
+  if(GH>window.innerHeight-200)GH=window.innerHeight-200;
+  gCvs.width=GW;gCvs.height=GH;
+  gCtx=gCvs.getContext('2d');
+  resetGame();
+  setupControls();
+  if(gameRaf)cancelAnimationFrame(gameRaf);
+  (function loop(){gameRaf=requestAnimationFrame(loop);if(gCtx&&gs)gameStep();})();
+}
+function restartGame(){if(!gameInited){initGame();return;}resetGame();}
+
+// Ground baseline — car axle center sits on ground surface
+// So car bottom = ground Y, car body above
+const GROUND_BASE=()=>Math.floor(GH*0.72);
+
+function genTerrain(startX,count){
+  const pts=[];
+  let x=startX,y=GROUND_BASE(),vel=0;
+  for(let i=0;i<count;i++){
+    pts.push({x:Math.round(x),y:Math.round(y)});
+    x+=38+Math.random()*32;
+    vel+=(Math.random()-.5)*4.5;
+    vel=Math.max(-2.5,Math.min(2.5,vel));
+    y+=vel;
+    // Keep within bounds
+    const gb=GROUND_BASE();
+    y=Math.max(gb-55,Math.min(gb+40,y));
+  }
+  return pts;
+}
+
+function getGroundY(terrain,px){
+  for(let i=0;i<terrain.length-1;i++){
+    if(px>=terrain[i].x && px<=terrain[i+1].x){
+      const t=(px-terrain[i].x)/(terrain[i+1].x-terrain[i].x);
+      return terrain[i].y+t*(terrain[i+1].y-terrain[i].y);
+    }
+  }
+  return terrain.length?terrain[terrain.length-1].y:GROUND_BASE();
+}
+
+function getGroundAngle(terrain,px){
+  for(let i=0;i<terrain.length-1;i++){
+    if(px>=terrain[i].x && px<=terrain[i+1].x){
+      const dx=terrain[i+1].x-terrain[i].x;
+      const dy=terrain[i+1].y-terrain[i].y;
+      return Math.atan2(dy,dx);
+    }
+  }
+  return 0;
+}
+
+function genItems(terrain,startX){
+  const food=[],fuel=[],rocks=[];
+  terrain.forEach((p,i)=>{
+    if(i<4)return;
+    if(i%4===2&&p.x>startX){
+      food.push({x:p.x+15,y:p.y-48,r:24,collected:false,
+        emoji:FOODS[Math.floor(Math.random()*FOODS.length)],
+        pts:[10,20,30,50][Math.floor(Math.random()*4)],bob:Math.random()*Math.PI*2});
+    }
+    if(i%9===5&&p.x>startX){
+      fuel.push({x:p.x+20,y:p.y-50,r:26,collected:false,bob:Math.random()*Math.PI*2});
+    }
+    if(i%11===7&&p.x>startX+150){
+      const rw=18+Math.random()*22,rh=12+Math.random()*16;
+      rocks.push({x:p.x+5,y:p.y-rh,w:rw,h:rh});
+    }
+  });
+  return{food,fuel,rocks};
+}
+
+function resetGame(){
+  const terrain=genTerrain(0,220);
+  const items=genItems(terrain,80);
+  const gb=GROUND_BASE();
+  // Car starts: axle center at ground Y, so car base = groundY
+  const startGroundY=getGroundY(terrain,100);
+  gs={
+    // Car position: x=center, y=axle center (wheels touch ground here)
+    x:100, y:startGroundY,
+    vx:0,vy:0,angle:0,wheelSpin:0,
+    onGround:true,wasOnGround:true,
+    fuel:100,score:0,lives:3,
+    dead:false,deadTimer:0,invincible:0,
+    started:false,frame:0,cam:0,
+    terrain,food:items.food,fuel2:items.fuel,rocks:items.rocks,
+    particles:[],popups:[],dustParticles:[]
+  };
+  updateHUD();
+}
+
+function setupControls(){
+  const L=document.getElementById('btnL');
+  const R=document.getElementById('btnR');
+  const J=document.getElementById('btnJump');
+
+  function setKey(k,v){keysDown[k]=v;if(gs&&v)gs.started=true;}
+
+  // Touch controls — prevent default to avoid scroll
+  L.addEventListener('touchstart',e=>{e.preventDefault();setKey('left',true);},{passive:false});
+  L.addEventListener('touchend',e=>{e.preventDefault();setKey('left',false);},{passive:false});
+  L.addEventListener('touchcancel',e=>{e.preventDefault();setKey('left',false);},{passive:false});
+  R.addEventListener('touchstart',e=>{e.preventDefault();setKey('right',true);},{passive:false});
+  R.addEventListener('touchend',e=>{e.preventDefault();setKey('right',false);},{passive:false});
+  R.addEventListener('touchcancel',e=>{e.preventDefault();setKey('right',false);},{passive:false});
+  J.addEventListener('touchstart',e=>{e.preventDefault();doJump();},{passive:false});
+  J.addEventListener('touchend',e=>{e.preventDefault();},{passive:false});
+
+  L.addEventListener('mousedown',()=>setKey('left',true));
+  L.addEventListener('mouseup',()=>setKey('left',false));
+  L.addEventListener('mouseleave',()=>setKey('left',false));
+  R.addEventListener('mousedown',()=>setKey('right',true));
+  R.addEventListener('mouseup',()=>setKey('right',false));
+  R.addEventListener('mouseleave',()=>setKey('right',false));
+  J.addEventListener('mousedown',doJump);
+
+  document.addEventListener('keydown',e=>{
+    if(currentPage!=='game')return;
+    if(e.key==='ArrowRight'||e.key==='d'){setKey('right',true);}
+    if(e.key==='ArrowLeft'||e.key==='a'){setKey('left',true);}
+    if((e.key==='ArrowUp'||e.key===' '||e.key==='w')){e.preventDefault();doJump();}
+  });
+  document.addEventListener('keyup',e=>{
+    if(e.key==='ArrowRight'||e.key==='d')setKey('right',false);
+    if(e.key==='ArrowLeft'||e.key==='a')setKey('left',false);
+  });
+}
+
+function doJump(){
+  if(!gs)return;
+  gs.started=true;
+  if(gs.onGround&&!gs.dead){
+    gs.vy=JUMP_VY;
+    gs.onGround=false;
+    sfx('jump');
+    // Exhaust particles
+    for(let i=0;i<8;i++){
+      gs.particles.push({x:gs.x,y:gs.y+WHEEL_R,
+        vx:(Math.random()-.5)*5,vy:Math.random()*3+1,
+        life:25,maxLife:25,col:'#60a5fa',size:3});
+    }
+  }
+}
+
+function updateHUD(){
+  if(!gs)return;
+  document.getElementById('scoreDisplay').textContent=gs.score;
+  document.getElementById('fuelPct').textContent=Math.max(0,Math.round(gs.fuel));
+  const bars=Math.round(gs.fuel/100*12);
+  document.getElementById('fuelBar').textContent='█'.repeat(bars)+'░'.repeat(12-bars);
+  document.getElementById('livesDisplay').textContent='❤️'.repeat(Math.max(0,gs.lives));
+}
+
+function gameStep(){
+  const g=gs;
+  g.frame++;
+  if(g.invincible>0)g.invincible--;
+
+  if(!g.dead){
+    // Input
+    if(g.started&&g.fuel>0){
+      if(keysDown['right']){g.vx=Math.min(g.vx+MOVE_ACC,MAX_VX);g.fuel-=0.025;}
+      if(keysDown['left']){g.vx=Math.max(g.vx-MOVE_ACC,-MAX_VX);g.fuel-=0.025;}
+    }
+    g.vx*=FRICTION;
+    g.vy=Math.min(g.vy+GRAVITY,MAX_VY);
+    g.x+=g.vx;
+    g.y+=g.vy;
+
+    // ── GROUND COLLISION (key fix) ──
+    // We treat g.y as the axle/wheel center Y
+    // The wheels touch at g.y (bottom of axle)
+    // Ground surface Y = getGroundY at car center x
+    const groundY=getGroundY(g.terrain,g.x);
+    const wasAbove=!g.wasOnGround;
+    g.wasOnGround=g.onGround;
+
+    if(g.y>=groundY){
+      // Car is ON or below ground — snap axle to ground surface
+      g.y=groundY;
+      if(g.vy>0.5){
+        if(g.vy>4)sfx('land');
+        // Slight bounce damp
+        g.vy=0;
+      }
+      g.onGround=true;
+      // Dust on landing
+      if(wasAbove&&g.frame>10){
+        for(let i=0;i<12;i++){
+          g.dustParticles.push({x:g.x+(Math.random()-.5)*CAR_W,y:groundY,
+            vx:(Math.random()-.5)*4,vy:-Math.random()*2-1,
+            life:30,maxLife:30,col:'#c05020',size:2+Math.random()*2});
+        }
+      }
+    } else {
+      g.onGround=false;
+    }
+
+    // Slope angle
+    g.angle=getGroundAngle(g.terrain,g.x)*0.6;
+
+    // Wheel spin
+    g.wheelSpin+=g.vx*0.12;
+
+    // Camera — smooth follow
+    const targetCam=g.x-GW*0.32;
+    g.cam+=(targetCam-g.cam)*0.1;
+    g.cam=Math.max(0,g.cam);
+
+    // Extend terrain
+    const lastT=g.terrain[g.terrain.length-1];
+    if(lastT&&lastT.x<g.cam+GW+500){
+      const newT=genTerrain(lastT.x,80);
+      g.terrain.push(...newT);
+      const ni=genItems(newT,lastT.x);
+      g.food.push(...ni.food);g.fuel2.push(...ni.fuel);g.rocks.push(...ni.rocks);
+    }
+
+    // Collect food
+    g.food.filter(f=>!f.collected).forEach(f=>{
+      f.bob+=0.07;
+      const dx=g.x-f.x,dy=g.y-CAR_H/2-f.y;
+      if(Math.sqrt(dx*dx+dy*dy)<f.r+20){
+        f.collected=true;g.score+=f.pts;sfx('collect');
+        g.popups.push({x:f.x,y:f.y,text:'+'+f.pts,life:45,col:'#fbbf24'});
+        for(let i=0;i<10;i++)g.particles.push({x:f.x,y:f.y,vx:(Math.random()-.5)*7,vy:(Math.random()-1)*5,life:28,maxLife:28,col:'#fbbf24',size:3});
+        updateHUD();
+      }
+    });
+
+    // Collect fuel
+    g.fuel2.filter(f=>!f.collected).forEach(f=>{
+      f.bob+=0.06;
+      const dx=g.x-f.x,dy=g.y-CAR_H/2-f.y;
+      if(Math.sqrt(dx*dx+dy*dy)<f.r+22){
+        f.collected=true;g.fuel=Math.min(100,g.fuel+40);sfx('fuel');
+        g.popups.push({x:f.x,y:f.y,text:'⛽+40',life:45,col:'#34d399'});
+        updateHUD();
+      }
+    });
+
+    // Rock collision
+    if(g.invincible===0){
+      g.rocks.forEach(r=>{
+        const cx=g.x,cy=g.y-CAR_H/2;
+        const carLeft=cx-CAR_W/2,carRight=cx+CAR_W/2,carTop=cy-CAR_H,carBot=cy;
+        if(carRight>r.x&&carLeft<r.x+r.w&&carBot>r.y&&carTop<r.y+r.h){
+          sfx('crash');g.lives--;g.invincible=80;
+          g.popups.push({x:g.x,y:g.y-40,text:'💥',life:40,col:'#f87171'});
+          for(let i=0;i<18;i++)g.particles.push({x:g.x,y:g.y,vx:(Math.random()-.5)*12,vy:(Math.random()-1)*10,life:40,maxLife:40,col:['#f87171','#fb923c','#fbbf24'][i%3],size:4});
+          if(g.lives<=0){g.dead=true;}
+          updateHUD();
+          // Push car up and back a bit
+          g.vx=-g.vx*0.6;g.vy=-5;
+        }
+      });
+    }
+
+    // Fuel empty
+    if(g.fuel<=0&&g.started&&!g.dead){
+      g.vx*=0.92;
+    }
+    // Fall off screen
+    if(g.y>GH+200)g.dead=true;
+
+    // Driving dust
+    if(g.onGround&&Math.abs(g.vx)>1&&g.frame%3===0){
+      const side=g.vx>0?-1:1;
+      g.dustParticles.push({x:g.x+side*(CAR_W/3),y:g.y,
+        vx:side*(Math.random()*2+1)+(Math.random()-.5),vy:-Math.random()*1.5,
+        life:18,maxLife:18,col:'#6b3520',size:1.5+Math.random()*1.5});
+    }
+  } else {
+    g.deadTimer++;
+  }
+
+  // Update particles
+  g.particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=0.3;p.life--;});
+  g.particles=g.particles.filter(p=>p.life>0);
+  g.dustParticles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.life--;p.vx*=0.9;});
+  g.dustParticles=g.dustParticles.filter(p=>p.life>0);
+  g.popups.forEach(p=>{p.y-=1.1;p.life--;});
+  g.popups=g.popups.filter(p=>p.life>0);
+
+  drawGame();
+}
+
+// ── DRAW CAR (detailed) ──
+function drawCar(ctx,x,y,angle,wheelSpin,vx,fuel,invincible,frame){
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.rotate(angle);
+
+  const moving=Math.abs(vx)>0.3;
+  const goingRight=vx>=0;
+
+  // === EXHAUST PIPE ===
+  const exhaustSide=goingRight?-1:1;
+  ctx.save();
+  ctx.translate(exhaustSide*(CAR_W/2-4),-(CAR_H*0.5));
+  // Pipe
+  ctx.fillStyle='#374151';
+  ctx.fillRect(-3,-6,6,10);
+  ctx.strokeStyle='#6b7280';ctx.lineWidth=1;
+  ctx.strokeRect(-3,-6,6,10);
+  // Exhaust smoke
+  if(moving&&fuel>0&&frame%2===0){
+    for(let i=0;i<2;i++){
+      const alpha=0.4+Math.random()*0.3;
+      ctx.beginPath();
+      ctx.arc(exhaustSide*(2+Math.random()*6),-8-Math.random()*10,3+Math.random()*3,0,Math.PI*2);
+      ctx.fillStyle=`rgba(150,150,150,${alpha})`;
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+
+  // === WHEELS ===
+  const wheelPositions=[[-CAR_W/2+18,0],[CAR_W/2-18,0]];
+  wheelPositions.forEach(([wx,wy])=>{
+    ctx.save();ctx.translate(wx,wy);ctx.rotate(wheelSpin);
+    // Tire outer
+    ctx.beginPath();ctx.arc(0,0,WHEEL_R,0,Math.PI*2);
+    ctx.fillStyle='#1a1a2e';ctx.fill();
+    ctx.strokeStyle='#374151';ctx.lineWidth=3;ctx.stroke();
+    // Tire tread
+    ctx.strokeStyle='#4b5563';ctx.lineWidth=1.5;
+    for(let i=0;i<8;i++){
+      const a=i*Math.PI/4;
+      ctx.beginPath();
+      ctx.arc(0,0,WHEEL_R-1,a,a+0.2);
+      ctx.stroke();
+    }
+    // Hub
+    ctx.beginPath();ctx.arc(0,0,WHEEL_R*0.4,0,Math.PI*2);
+    ctx.fillStyle='#c1440e';ctx.fill();
+    ctx.strokeStyle='#ef4444';ctx.lineWidth=1;ctx.stroke();
+    // Spokes
+    ctx.strokeStyle='#d1d5db';ctx.lineWidth=1.5;
+    for(let i=0;i<5;i++){
+      const a=i*Math.PI*2/5;
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(a)*WHEEL_R*0.38,Math.sin(a)*WHEEL_R*0.38);
+      ctx.lineTo(Math.cos(a)*WHEEL_R*0.85,Math.sin(a)*WHEEL_R*0.85);
+      ctx.stroke();
+    }
+    ctx.restore();
+  });
+
+  // === SUSPENSION ARMS ===
+  ctx.strokeStyle='#4b5563';ctx.lineWidth=2;
+  wheelPositions.forEach(([wx])=>{
+    ctx.beginPath();
+    ctx.moveTo(wx,-CAR_H*0.2);
+    ctx.lineTo(wx,0);
+    ctx.stroke();
+  });
+
+  // === CAR BODY ===
+  // Body gradient
+  const bodyGrad=ctx.createLinearGradient(-CAR_W/2,-CAR_H,-CAR_W/2,0);
+  bodyGrad.addColorStop(0,'#dc2626');
+  bodyGrad.addColorStop(0.5,'#b91c1c');
+  bodyGrad.addColorStop(1,'#7f1d1d');
+  ctx.fillStyle=bodyGrad;
+  ctx.beginPath();
+  ctx.roundRect(-CAR_W/2,-CAR_H,CAR_W,CAR_H-AXLE_Y,6);
+  ctx.fill();
+  // Body outline
+  ctx.strokeStyle='#ef4444';ctx.lineWidth=1.5;
+  ctx.beginPath();
+  ctx.roundRect(-CAR_W/2,-CAR_H,CAR_W,CAR_H-AXLE_Y,6);
+  ctx.stroke();
+
+  // === SIDE DETAIL LINES (panel lines) ===
+  ctx.strokeStyle='rgba(0,0,0,0.35)';ctx.lineWidth=1;
+  // Top panel line
+  ctx.beginPath();ctx.moveTo(-CAR_W/2+4,-CAR_H+8);ctx.lineTo(CAR_W/2-4,-CAR_H+8);ctx.stroke();
+  // Bottom panel line
+  ctx.beginPath();ctx.moveTo(-CAR_W/2+4,-AXLE_Y-6);ctx.lineTo(CAR_W/2-4,-AXLE_Y-6);ctx.stroke();
+  // Vertical accents
+  ctx.beginPath();ctx.moveTo(-CAR_W/2+20,-CAR_H+4);ctx.lineTo(-CAR_W/2+20,-AXLE_Y-4);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(CAR_W/2-20,-CAR_H+4);ctx.lineTo(CAR_W/2-20,-AXLE_Y-4);ctx.stroke();
+
+  // === COCKPIT ===
+  const cpW=CAR_W*0.42,cpH=16;
+  const cockpitGrad=ctx.createLinearGradient(-cpW/2,-CAR_H-cpH,-cpW/2,-CAR_H);
+  cockpitGrad.addColorStop(0,'#1e3a8a');
+  cockpitGrad.addColorStop(1,'#1d4ed8');
+  ctx.fillStyle=cockpitGrad;
+  ctx.beginPath();
+  ctx.roundRect(-cpW/2,-CAR_H-cpH,cpW,cpH+4,[6,6,0,0]);
+  ctx.fill();
+  ctx.strokeStyle='#60a5fa';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.roundRect(-cpW/2,-CAR_H-cpH,cpW,cpH+4,[6,6,0,0]);ctx.stroke();
+  // Windshield reflection
+  ctx.fillStyle='rgba(147,197,253,0.35)';
+  ctx.beginPath();
+  ctx.roundRect(-cpW/2+3,-CAR_H-cpH+3,cpW*0.4,cpH-4,3);
+  ctx.fill();
+  // Cockpit stripe
+  ctx.fillStyle='rgba(0,212,255,0.2)';
+  ctx.fillRect(-cpW/2,-CAR_H-2,cpW,2);
+
+  // === HEADLIGHTS ===
+  const hSide=goingRight?1:-1;
+  const hx=hSide*(CAR_W/2-4);
+  // Glow
+  ctx.save();
+  const hGlow=ctx.createRadialGradient(hx,-CAR_H*0.5,0,hx,-CAR_H*0.5,14);
+  hGlow.addColorStop(0,'rgba(255,220,100,0.7)');
+  hGlow.addColorStop(1,'rgba(255,220,100,0)');
+  ctx.fillStyle=hGlow;ctx.beginPath();ctx.arc(hx,-CAR_H*0.5,14,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+  // Light lens
+  ctx.fillStyle='#fde68a';ctx.beginPath();ctx.ellipse(hx,-CAR_H*0.5,5,4,0,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#fbbf24';ctx.lineWidth=1;ctx.stroke();
+
+  // === TAIL LIGHTS ===
+  const tx=-hSide*(CAR_W/2-4);
+  ctx.fillStyle=moving?'#ef4444':'#7f1d1d';
+  ctx.beginPath();ctx.ellipse(tx,-CAR_H*0.5,4,3,0,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#dc2626';ctx.lineWidth=1;ctx.stroke();
+
+  // === MARS LOGO on side ===
+  ctx.save();
+  ctx.font='bold 9px Share Tech Mono,monospace';
+  ctx.fillStyle='rgba(255,255,255,0.5)';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('MARS',0,-CAR_H*0.55);
+  ctx.restore();
+
+  // === DAMAGE FLASH (invincible) ===
+  if(invincible>0&&Math.floor(invincible/5)%2===1){
+    ctx.globalAlpha=0.5;
+    ctx.fillStyle='#fff';
+    ctx.beginPath();ctx.roundRect(-CAR_W/2,-CAR_H-cpH,CAR_W,CAR_H+cpH,6);ctx.fill();
+    ctx.globalAlpha=1;
+  }
+
+  ctx.restore();
+}
+
+function drawGame(){
+  const g=gs,ctx=gCtx,cam=g.cam;
+  ctx.clearRect(0,0,GW,GH);
+
+  // Sky
+  const sky=ctx.createLinearGradient(0,0,0,GH);
+  sky.addColorStop(0,'#010006');sky.addColorStop(0.55,'#06000f');sky.addColorStop(1,'#120006');
+  ctx.fillStyle=sky;ctx.fillRect(0,0,GW,GH);
+
+  // Distant stars (parallax)
+  ctx.fillStyle='rgba(255,255,255,0.5)';
+  const sx=cam*0.15;
+  for(let i=0;i<40;i++){
+    const px=((i*137+200-sx)%GW+GW)%GW;
+    const py=10+((i*73)%120);
+    ctx.fillRect(px,py,1,1);
+  }
+
+  // Sun/planet in background
+  ctx.save();
+  const sunX=GW*0.85-(cam*0.05)%GW;
+  const sunGr=ctx.createRadialGradient(sunX,50,5,sunX,50,45);
+  sunGr.addColorStop(0,'rgba(255,120,60,0.9)');
+  sunGr.addColorStop(0.6,'rgba(200,60,20,0.5)');
+  sunGr.addColorStop(1,'rgba(180,40,10,0)');
+  ctx.fillStyle=sunGr;ctx.beginPath();ctx.arc(sunX,50,45,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+
+  // Translate by camera
+  ctx.save();
+  ctx.translate(-cam,0);
+
+  // === BACKGROUND MOUNTAINS ===
+  ctx.save();
+  ctx.translate(cam*0.3-cam,0); // extra parallax
+  ctx.translate(cam,0); // correct back then apply parallax offset
+  // Draw hills in bg
+  const bgX=(cam*0.3)%300;
+  ctx.beginPath();
+  for(let i=-1;i<GW/60+2;i++){
+    const bx=i*60-bgX;
+    const h=35+Math.sin(i*1.7)*25;
+    if(i===0||i===-1)ctx.moveTo(bx,GH-80);
+    ctx.lineTo(bx,GH-80-h);ctx.lineTo(bx+30,GH-80);
+  }
+  ctx.closePath();
+  const bgMtnGr=ctx.createLinearGradient(0,GH-130,0,GH-80);
+  bgMtnGr.addColorStop(0,'#4a1a0a');bgMtnGr.addColorStop(1,'#2d0d05');
+  ctx.fillStyle=bgMtnGr;ctx.fill();
+  ctx.restore();
+
+  // === TERRAIN SURFACE ===
+  const t=g.terrain;
+  ctx.beginPath();
+  ctx.moveTo(t[0].x,GH);
+  t.forEach(p=>ctx.lineTo(p.x,p.y));
+  ctx.lineTo(t[t.length-1].x,GH);ctx.closePath();
+  const terrGr=ctx.createLinearGradient(0,GROUND_BASE()-80,0,GH);
+  terrGr.addColorStop(0,'#7c2d12');terrGr.addColorStop(0.2,'#92400e');
+  terrGr.addColorStop(0.5,'#78350f');terrGr.addColorStop(1,'#1c0500');
+  ctx.fillStyle=terrGr;ctx.fill();
+
+  // Terrain surface line with glow
+  ctx.beginPath();
+  t.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));
+  ctx.strokeStyle='#c05020';ctx.lineWidth=2.5;ctx.stroke();
+  // Subtle glow on surface
+  ctx.beginPath();
+  t.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));
+  ctx.strokeStyle='rgba(255,100,40,0.15)';ctx.lineWidth=8;ctx.stroke();
+
+  // === SURFACE DETAILS (craters, rocks texture) ===
+  for(let i=0;i<t.length-1;i+=3){
+    const p=t[i];
+    if(!p)continue;
+    // Small surface pebbles
+    ctx.fillStyle='rgba(180,80,30,0.4)';
+    ctx.beginPath();ctx.ellipse(p.x+10,p.y-3,4,2.5,0.3,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(120,50,20,0.35)';
+    ctx.beginPath();ctx.ellipse(p.x+25,p.y-2,3,2,0.5,0,Math.PI*2);ctx.fill();
+  }
+  // Subtle crater marks
+  for(let i=2;i<t.length-2;i+=15){
+    const p=t[i];if(!p)continue;
+    ctx.strokeStyle='rgba(90,30,10,0.5)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.ellipse(p.x+8,p.y-1,8,3,-0.1,0,Math.PI*2);ctx.stroke();
+  }
+
+  // === ROCKS ===
+  g.rocks.forEach(r=>{
+    ctx.save();ctx.translate(r.x+r.w/2,r.y+r.h/2);
+    // Rock shadow
+    ctx.fillStyle='rgba(0,0,0,0.4)';
+    ctx.beginPath();ctx.ellipse(0,r.h/2+2,r.w*0.6,4,0,0,Math.PI*2);ctx.fill();
+    // Rock body
+    const rGr=ctx.createRadialGradient(-r.w*0.2,-r.h*0.3,0,0,0,r.w*0.8);
+    rGr.addColorStop(0,'#6b7280');rGr.addColorStop(1,'#1f2937');
+    ctx.fillStyle=rGr;
+    ctx.beginPath();
+    ctx.ellipse(0,0,r.w/2,r.h/2,0.1,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#4b5563';ctx.lineWidth=1.5;ctx.stroke();
+    // Rock highlight
+    ctx.fillStyle='rgba(200,200,200,0.2)';
+    ctx.beginPath();ctx.ellipse(-r.w*0.15,-r.h*0.2,r.w*0.25,r.h*0.18,-0.2,0,Math.PI*2);ctx.fill();
+    // Danger glow
+    ctx.strokeStyle='rgba(239,68,68,0.3)';ctx.lineWidth=3;
+    ctx.beginPath();ctx.ellipse(0,0,r.w/2+3,r.h/2+3,0.1,0,Math.PI*2);ctx.stroke();
+    ctx.restore();
+  });
+
+  // === FUEL CANS ===
+  g.fuel2.filter(f=>!f.collected).forEach(f=>{
+    const bob=Math.sin(f.bob)*6;
+    ctx.save();ctx.translate(f.x,f.y+bob);
+    // Glow
+    const fGlow=ctx.createRadialGradient(0,0,5,0,0,22);
+    fGlow.addColorStop(0,'rgba(52,211,153,0.4)');fGlow.addColorStop(1,'rgba(52,211,153,0)');
+    ctx.fillStyle=fGlow;ctx.beginPath();ctx.arc(0,0,22,0,Math.PI*2);ctx.fill();
+    ctx.font='26px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('⛽',0,0);
+    ctx.restore();
+  });
+
+  // === FOOD ===
+  g.food.filter(f=>!f.collected).forEach(f=>{
+    const bob=Math.sin(f.bob)*7;
+    ctx.save();ctx.translate(f.x,f.y+bob);
+    // Glow
+    const fGlow=ctx.createRadialGradient(0,0,4,0,0,20);
+    fGlow.addColorStop(0,'rgba(251,191,36,0.4)');fGlow.addColorStop(1,'rgba(251,191,36,0)');
+    ctx.fillStyle=fGlow;ctx.beginPath();ctx.arc(0,0,20,0,Math.PI*2);ctx.fill();
+    ctx.font='24px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(f.emoji,0,0);
+    ctx.restore();
+  });
+
+  // === DUST PARTICLES ===
+  g.dustParticles.forEach(p=>{
+    ctx.globalAlpha=p.life/p.maxLife*0.6;
+    ctx.fillStyle=p.col;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();
+  });
+  ctx.globalAlpha=1;
+
+  // === CAR ===
+  if(!g.dead||Math.floor(g.deadTimer/6)%2===0){
+    drawCar(gCtx,g.x,g.y,g.angle,g.wheelSpin,g.vx,g.fuel,g.invincible,g.frame);
+  }
+
+  // === PARTICLES ===
+  g.particles.forEach(p=>{
+    ctx.globalAlpha=p.life/p.maxLife;
+    ctx.fillStyle=p.col;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();
+  });
+  ctx.globalAlpha=1;
+
+  // === POPUPS ===
+  ctx.textAlign='center';
+  g.popups.forEach(p=>{
+    ctx.globalAlpha=p.life/45;
+    ctx.font='bold 15px Share Tech Mono,monospace';
+    ctx.fillStyle=p.col;ctx.fillText(p.text,p.x,p.y);
+  });
+  ctx.globalAlpha=1;
+
+  ctx.restore(); // end camera translate
+
+  // === HUD OVERLAYS ===
+  if(!g.started&&!g.dead){
+    ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,0,GW,GH);
+    ctx.textAlign='center';
+    ctx.font='bold 20px Orbitron,monospace';ctx.fillStyle='#00d4ff';
+    ctx.fillText('🚗 MARS RACER',GW/2,GH/2-28);
+    ctx.font='13px Share Tech Mono,monospace';ctx.fillStyle='#94a3b8';
+    ctx.fillText('Drive with buttons or arrow keys',GW/2,GH/2+8);
+    ctx.fillText('Collect food, avoid rocks!',GW/2,GH/2+28);
+  }
+  if(g.dead){
+    ctx.fillStyle='rgba(0,0,0,.72)';ctx.fillRect(0,0,GW,GH);
+    ctx.textAlign='center';
+    ctx.font='bold 26px Orbitron,monospace';ctx.fillStyle='#f87171';
+    ctx.fillText('💥 GAME OVER',GW/2,GH/2-30);
+    ctx.font='18px Orbitron,monospace';ctx.fillStyle='#fbbf24';
+    ctx.fillText('Score: '+g.score,GW/2,GH/2+8);
+    ctx.font='13px Share Tech Mono,monospace';ctx.fillStyle='#64748b';
+    ctx.fillText('Tap ↺ Restart to try again',GW/2,GH/2+38);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// 3D PLANETS  (CSS 3D + Canvas sphere rendering)
+// ═══════════════════════════════════════════════════════
+const PLANETS=[
+  {name:'Mercury',col:'#94a3b8',glow:'rgba(148,163,184,.4)',border:'#64748b',
+   size:44,spin:22,
+   bands:[{y:0,h:1,c:'#94a3b8'},{y:.2,h:.15,c:'#b0bec5'},{y:.5,h:.12,c:'#78909c'},{y:.75,h:.1,c:'#607d8b'}],
+   stats:{Diameter:'4,879 km',Moons:'0',Gravity:'3.7 m/s²',Temp:'-180 to 430°C',Day:'58.6 Earth days',Year:'87.97 Earth days'},
+   fact:'Mercury is the smallest planet and closest to the Sun, yet NOT the hottest! It has wild temperature swings from -180°C at night to 430°C during the day due to having virtually no atmosphere.'},
+  {name:'Venus',col:'#fde68a',glow:'rgba(253,230,138,.4)',border:'#f59e0b',
+   size:60,spin:18,
+   bands:[{y:0,h:1,c:'#f59e0b'},{y:.15,h:.2,c:'#fde68a'},{y:.35,h:.15,c:'#fcd34d'},{y:.6,h:.25,c:'#f59e0b'},{y:.85,h:.15,c:'#d97706'}],
+   stats:{Diameter:'12,104 km',Moons:'0',Gravity:'8.87 m/s²',Temp:'465°C avg',Day:'243 Earth days',Year:'225 Earth days'},
+   fact:'Venus is the hottest planet at 465°C average! It spins backwards — so the Sun rises in the WEST on Venus. Its thick CO₂ atmosphere creates a runaway greenhouse effect that melts lead.'},
+  {name:'Earth',col:'#34d399',glow:'rgba(52,211,153,.4)',border:'#10b981',
+   size:62,spin:15,
+   bands:[{y:0,h:1,c:'#1e40af'},{y:.1,h:.12,c:'#34d399'},{y:.28,h:.08,c:'#1e40af'},{y:.38,h:.25,c:'#16a34a'},{y:.65,h:.12,c:'#1e40af'},{y:.8,h:.2,c:'#15803d'}],
+   stats:{Diameter:'12,742 km',Moons:'1',Gravity:'9.81 m/s²',Temp:'-88 to 58°C',Day:'24 hours',Year:'365.25 days'},
+   fact:'Earth is the ONLY known planet with life! 71% of its surface is water. The magnetic field protects us from harmful solar radiation. It\'s the densest planet in the Solar System.'},
+  {name:'Mars',col:'#f87171',glow:'rgba(248,113,113,.4)',border:'#ef4444',
+   size:50,spin:15,
+   bands:[{y:0,h:1,c:'#c2410c'},{y:.1,h:.15,c:'#f87171'},{y:.3,h:.2,c:'#dc2626'},{y:.55,h:.15,c:'#b91c1c'},{y:.75,h:.25,c:'#c2410c'}],
+   stats:{Diameter:'6,779 km',Moons:'2 (Phobos & Deimos)',Gravity:'3.72 m/s²',Temp:'-125 to 20°C',Day:'24.6 hours',Year:'686.97 Earth days'},
+   fact:'Mars is the Red Planet due to iron oxide (rust) on its surface. It has the tallest volcano in the Solar System — Olympus Mons at 21.9 km tall! Humans may one day colonize Mars 🚀'},
+  {name:'Jupiter',col:'#fb923c',glow:'rgba(251,146,60,.4)',border:'#f97316',
+   size:85,spin:10,
+   bands:[{y:0,h:.1,c:'#fed7aa'},{y:.1,h:.08,c:'#c2410c'},{y:.18,h:.12,c:'#fde68a'},{y:.3,h:.1,c:'#92400e'},{y:.4,h:.15,c:'#fbbf24'},{y:.55,h:.1,c:'#c2410c'},{y:.65,h:.12,c:'#fed7aa'},{y:.77,h:.1,c:'#92400e'},{y:.87,h:.13,c:'#fde68a'}],
+   hasRedSpot:true,
+   stats:{Diameter:'139,820 km',Moons:'95',Gravity:'24.79 m/s²',Temp:'-110°C cloud tops',Day:'9.9 hours',Year:'11.86 Earth years'},
+   fact:'Jupiter is SO big that 1,300 Earths could fit inside it! Its Great Red Spot is a storm raging for 350+ years. It has 95 moons — Europa may have a subsurface ocean with potential life!'},
+  {name:'Saturn',col:'#fde68a',glow:'rgba(253,230,138,.4)',border:'#fcd34d',
+   size:78,spin:11,hasRings:true,
+   bands:[{y:0,h:.12,c:'#fef3c7'},{y:.12,h:.1,c:'#fde68a'},{y:.22,h:.15,c:'#fcd34d'},{y:.37,h:.12,c:'#f3d880'},{y:.49,h:.15,c:'#fde68a'},{y:.64,h:.12,c:'#fcd34d'},{y:.76,h:.24,c:'#f0c040'}],
+   stats:{Diameter:'116,460 km',Moons:'146',Gravity:'10.44 m/s²',Temp:'-178°C avg',Day:'10.7 hours',Year:'29.46 Earth years'},
+   fact:'Saturn is so light it would FLOAT on water! Its rings are made of ice and rock. It has 146 moons — the most of any planet. Its moon Titan has liquid methane lakes and a thick atmosphere!'},
+  {name:'Uranus',col:'#67e8f9',glow:'rgba(103,232,249,.4)',border:'#22d3ee',
+   size:68,spin:17,hasRings:true,ringsStyle:'thin',
+   bands:[{y:0,h:.3,c:'#a5f3fc'},{y:.3,h:.2,c:'#67e8f9'},{y:.5,h:.2,c:'#22d3ee'},{y:.7,h:.3,c:'#0e7490'}],
+   stats:{Diameter:'50,724 km',Moons:'28',Gravity:'8.87 m/s²',Temp:'-224°C avg',Day:'17.2 hours',Year:'84 Earth years'},
+   fact:'Uranus is the coldest planet at -224°C! It rotates on its SIDE — its tilt is 98°, so its poles experience 42 years of sunlight then 42 years of darkness. It\'s an "ice giant" with a slushy ocean.'},
+  {name:'Neptune',col:'#818cf8',glow:'rgba(129,140,248,.4)',border:'#6366f1',
+   size:66,spin:16,
+   bands:[{y:0,h:.2,c:'#312e81'},{y:.2,h:.15,c:'#818cf8'},{y:.35,h:.2,c:'#4338ca'},{y:.55,h:.15,c:'#6366f1'},{y:.7,h:.3,c:'#3730a3'}],
+   stats:{Diameter:'49,244 km',Moons:'16',Gravity:'11.15 m/s²',Temp:'-214°C avg',Day:'16.1 hours',Year:'164.8 Earth years'},
+   fact:'Neptune has the strongest winds in the Solar System — up to 2,100 km/h! It was discovered by mathematical prediction. Its moon Triton orbits BACKWARDS and may be a captured Kuiper Belt object.'},
+];
+
+let selectedPlanet=null;
+// Canvas-based 3D sphere renderer
+function draw3DPlanet(canvas,planet,size,animated){
+  const ctx=canvas.getContext('2d');
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=size*dpr;canvas.height=size*dpr;
+  canvas.style.width=size+'px';canvas.style.height=size+'px';
+  ctx.scale(dpr,dpr);
+  const cx=size/2,cy=size/2,r=size/2-2;
+
+  let frame=0;
+  function render(offset){
+    ctx.clearRect(0,0,size,size);
+    // === SPHERE BANDS (simulating 3D rotation) ===
+    // Clip to circle
+    ctx.save();
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.clip();
+
+    // Base fill
+    ctx.fillStyle=planet.bands[0].c;
+    ctx.fillRect(0,0,size,size);
+
+    // Draw bands with wave effect for 3D look
+    planet.bands.slice(1).forEach(band=>{
+      const bandY=cy-r+band.y*size;
+      const bandH=band.h*size;
+      // Sine wave for band edges (simulates sphere curvature)
+      ctx.beginPath();
+      ctx.moveTo(0,bandY);
+      for(let x=0;x<=size;x+=2){
+        const nx=(x/size)*Math.PI*2;
+        // Offset moves band for rotation effect
+        const wave=Math.sin(nx+offset*0.8)*r*0.09;
+        ctx.lineTo(x,bandY+wave);
+      }
+      ctx.lineTo(size,bandY+bandH);
+      ctx.lineTo(0,bandY+bandH);ctx.closePath();
+      ctx.fillStyle=band.c;ctx.fill();
+    });
+
+    // Great Red Spot for Jupiter
+    if(planet.hasRedSpot){
+      const spotX=(cx+r*0.35+Math.sin(offset)*r*0.4+size)%size;
+      const spotY=cy+r*0.12;
+      ctx.save();
+      ctx.translate(spotX,spotY);
+      const sGr=ctx.createRadialGradient(0,0,2,0,0,r*0.2);
+      sGr.addColorStop(0,'rgba(180,40,10,0.95)');sGr.addColorStop(1,'rgba(180,40,10,0)');
+      ctx.fillStyle=sGr;
+      ctx.beginPath();ctx.ellipse(0,0,r*0.2,r*0.12,0.1,0,Math.PI*2);ctx.fill();
+      ctx.restore();
+    }
+
+    // === ATMOSPHERE HAZE at edges ===
+    const atmoGr=ctx.createRadialGradient(cx,cy,r*0.7,cx,cy,r);
+    atmoGr.addColorStop(0,'rgba(0,0,0,0)');
+    atmoGr.addColorStop(1,`${planet.col}33`);
+    ctx.fillStyle=atmoGr;ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();
+
+    ctx.restore(); // end clip
+
+    // === 3D LIGHT (radial highlight & shadow) ===
+    // Bright highlight top-left
+    ctx.save();
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.clip();
+    const hlGr=ctx.createRadialGradient(cx-r*0.35,cy-r*0.35,0,cx-r*0.35,cy-r*0.35,r*0.85);
+    hlGr.addColorStop(0,'rgba(255,255,255,0.38)');hlGr.addColorStop(0.5,'rgba(255,255,255,0.06)');hlGr.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.fillStyle=hlGr;ctx.fillRect(0,0,size,size);
+    // Dark shadow bottom-right
+    const sdGr=ctx.createRadialGradient(cx+r*0.45,cy+r*0.45,0,cx+r*0.45,cy+r*0.45,r*0.9);
+    sdGr.addColorStop(0,'rgba(0,0,0,0.72)');sdGr.addColorStop(0.6,'rgba(0,0,0,0.3)');sdGr.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=sdGr;ctx.fillRect(0,0,size,size);
+    ctx.restore();
+
+    // Edge glow / rim light
+    ctx.save();
+    const rimGr=ctx.createRadialGradient(cx,cy,r-3,cx,cy,r+2);
+    rimGr.addColorStop(0,planet.col+'00');rimGr.addColorStop(0.6,planet.col+'40');rimGr.addColorStop(1,'transparent');
+    ctx.strokeStyle=planet.col;ctx.lineWidth=3;ctx.shadowColor=planet.col;ctx.shadowBlur=12;
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();
+    ctx.restore();
+  }
+
+  if(animated){
+    let rotOffset=0;
+    const spd=0.004*(30/planet.spin);
+    function anim(){
+      render(rotOffset);rotOffset+=spd;
+      canvas._animFrame=requestAnimationFrame(anim);
+    }
+    if(canvas._animFrame)cancelAnimationFrame(canvas._animFrame);
+    anim();
+  } else {
+    render(0);
+  }
+}
+
+function makePlanet3D(planet,size,animated){
+  const wrap=document.createElement('div');
+  wrap.style.cssText=`position:relative;width:${size}px;height:${size}px;flex-shrink:0`;
+  const canvas=document.createElement('canvas');
+  canvas.style.cssText=`border-radius:50%;display:block;`;
+  wrap.appendChild(canvas);
+  draw3DPlanet(canvas,planet,size,animated);
+
+  // Rings for Saturn & Uranus
+  if(planet.hasRings){
+    const rw=size*(planet.ringsStyle==='thin'?1.7:2.1);
+    const rh=rw*0.22;
+    const ring=document.createElement('div');
+    ring.style.cssText=`position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotateX(72deg);
+      width:${rw}px;height:${rh}px;border-radius:50%;pointer-events:none;z-index:4;animation:ringRotate ${planet.spin*4}s linear infinite;`;
+    // Multiple ring bands
+    const ringColors=planet.ringsStyle==='thin'?
+      ['rgba(103,232,249,0.3)','rgba(34,211,238,0.15)']:
+      ['rgba(253,230,138,0.55)','rgba(252,211,77,0.3)','rgba(253,230,138,0.4)'];
+    const ringWidths=planet.ringsStyle==='thin'?[4,2]:[7,5,4];
+    let rOffset=size*0.52;
+    ringColors.forEach((rc,ri)=>{
+      const rEl=document.createElement('div');
+      const rElW=rw-rOffset*2;const rElH=rElW*0.18;
+      rEl.style.cssText=`position:absolute;left:50%;top:50%;
+        transform:translate(-50%,-50%);
+        width:${rElW}px;height:${rElH}px;
+        border-radius:50%;border:${ringWidths[ri]}px solid ${rc};
+        box-shadow:0 0 6px ${rc};`;
+      ring.appendChild(rEl);
+      rOffset+=ringWidths[ri]+3;
+    });
+    wrap.appendChild(ring);
+  }
+  return wrap;
+}
+
+function planetBack(){
+  if(selectedPlanet!==null){selectedPlanet=null;renderPlanets();}
+  else showPage('home');
+}
+
+function renderPlanets(){
+  const el=document.getElementById('planetsContent');
+  const titleEl=document.getElementById('planetsTitle');
+  // Stop previous animations
+  el.querySelectorAll('canvas').forEach(c=>{if(c._animFrame)cancelAnimationFrame(c._animFrame);});
+  if(selectedPlanet!==null){
+    renderPlanetDetail(selectedPlanet);return;
+  }
+  titleEl.textContent='🪐 Solar System';
+  el.innerHTML='';
+  el.style.cssText='flex:1;overflow-y:auto;overflow-x:hidden';
+  const grid=document.createElement('div');grid.className='planets-grid';
+  PLANETS.forEach((p,i)=>{
+    const card=document.createElement('div');card.className='planet-card';
+    card.style.borderColor=p.border;
+    card.style.boxShadow=`0 0 18px ${p.glow}`;
+    const sphere=makePlanet3D(p,Math.min(p.size,60),true);
+    const name=document.createElement('div');name.className='planet-name';name.textContent=p.name;
+    card.appendChild(sphere);card.appendChild(name);
+    card.onclick=()=>{selectedPlanet=i;renderPlanets();};
+    grid.appendChild(card);
+  });
+  el.appendChild(grid);
+}
+
+function renderPlanetDetail(i){
+  const p=PLANETS[i];
+  const titleEl=document.getElementById('planetsTitle');
+  titleEl.textContent='← '+p.name;
+  const el=document.getElementById('planetsContent');
+  el.querySelectorAll('canvas').forEach(c=>{if(c._animFrame)cancelAnimationFrame(c._animFrame);});
+  el.innerHTML='';
+  el.style.cssText='flex:1;overflow-y:auto;overflow-x:hidden';
+
+  const detail=document.createElement('div');detail.className='planet-detail';
+  // Hero 3D planet
+  const heroWrap=document.createElement('div');heroWrap.className='pd-3d-hero';
+  const heroSize=Math.min(p.size*1.5,120);
+  const sphere=makePlanet3D(p,heroSize,true);
+  // Glow under planet
+  const glow=document.createElement('div');
+  glow.style.cssText=`position:absolute;width:${heroSize*1.5}px;height:30px;bottom:0;left:50%;transform:translateX(-50%);
+    background:radial-gradient(ellipse,${p.glow} 0%,transparent 70%);pointer-events:none;filter:blur(6px)`;
+  heroWrap.appendChild(glow);heroWrap.appendChild(sphere);
+  detail.appendChild(heroWrap);
+
+  // Name
+  const nm=document.createElement('div');nm.className='pd-name';nm.textContent=p.name;detail.appendChild(nm);
+
+  // Stats grid
+  const statsGrid=document.createElement('div');statsGrid.className='pd-stats';
+  Object.entries(p.stats).forEach(([k,v])=>{
+    const box=document.createElement('div');box.className='stat-box';
+    box.style.borderColor=p.border+'50';
+    box.innerHTML=`<div class="stat-label">${k}</div><div class="stat-val">${v}</div>`;
+    statsGrid.appendChild(box);
+  });
+  detail.appendChild(statsGrid);
+
+  // Fact
+  const fact=document.createElement('div');fact.className='planet-fact';
+  fact.style.cssText+=`background:${p.glow.replace('.4',',.08')};border:1px solid ${p.border}40`;
+  fact.textContent='💡 '+p.fact;detail.appendChild(fact);
+
+  // Back button
+  const backBtn=document.createElement('button');backBtn.className='pd-back-btn';
+  backBtn.style.borderColor=p.border;backBtn.style.color=p.col;
+  backBtn.textContent='← Back to Solar System';
+  backBtn.onclick=()=>{selectedPlanet=null;renderPlanets();};
+  detail.appendChild(backBtn);
+
+  el.appendChild(detail);
+}
+
+// ═══════════════════════════════════════
+// AI CHAT
+// ═══════════════════════════════════════
+const LANGS=[
+  {code:'auto',label:'🌐 Auto',hint:'AI aapki language detect karke reply karega'},
+  {code:'hi',label:'🇮🇳 Hindi/Hinglish',hint:'AI Hinglish mein reply karega'},
+  {code:'en',label:'🇬🇧 English',hint:'AI will reply in English'},
+  {code:'ur',label:'🇵🇰 Urdu',hint:'AI اردو میں جواب دے گا'},
+  {code:'es',label:'🇪🇸 Español',hint:'AI responderá en español'},
+  {code:'fr',label:'🇫🇷 Français',hint:'L\'IA répondra en français'},
+  {code:'de',label:'🇩🇪 Deutsch',hint:'KI antwortet auf Deutsch'},
+  {code:'ar',label:'🇸🇦 عربي',hint:'سيرد الذكاء الاصطناعي بالعربية'},
+  {code:'zh',label:'🇨🇳 中文',hint:'AI将用中文回复'},
+  {code:'ja',label:'🇯🇵 日本語',hint:'AIは日本語で返信します'},
+  {code:'ru',label:'🇷🇺 Русский',hint:'ИИ ответит на русском'},
+  {code:'pt',label:'🇧🇷 Português',hint:'A IA responderá em português'},
+];
+const CHIPS=['🪐 Mars ke baare mein batao','🌌 Black hole kya hota hai?','☀️ Sun kaise kaam karta hai?','🌙 Moon ke facts','🚀 Space mission history','⭐ Types of stars','🪐 Saturn rings kya hain?','🌠 Shooting stars kya hain?','👽 Alien life possible hai?','🌍 Earth special kyu hai?'];
+let aiInited=false,chatHistory=[],selectedLang='auto',aiTyping=false;
+
+function initAI(){
+  if(aiInited)return;aiInited=true;
+  const menu=document.getElementById('langMenu');
+  LANGS.forEach(l=>{
+    const btn=document.createElement('button');btn.className='lang-opt'+(l.code===selectedLang?' sel':'');
+    btn.textContent=l.label;
+    btn.onclick=()=>{
+      selectedLang=l.code;
+      document.getElementById('langToggle').textContent=l.label+' ▾';
+      document.getElementById('langHint').textContent=l.hint;
+      menu.querySelectorAll('.lang-opt').forEach(b=>b.classList.remove('sel'));
+      btn.classList.add('sel');menu.classList.remove('open');
+    };menu.appendChild(btn);
+  });
+  const chipsEl=document.getElementById('chips');
+  CHIPS.forEach(c=>{
+    const ch=document.createElement('div');ch.className='chip';ch.textContent=c;
+    ch.onclick=()=>{document.getElementById('aiInput').value=c;sendMsg();};
+    chipsEl.appendChild(ch);
+  });
+  addMsg('ai','👋 Namaste! Main COSMO AI hun — aapka space guide! 🌌\n\nMujhse kuch bhi poochho:\n🪐 Planets & Solar System\n🌌 Galaxies & Universe\n🚀 Space missions & history\n⭐ Stars, black holes, nebulae\n\nKisi bhi language mein poochho! 🌟');
+}
+
+function toggleLangMenu(){document.getElementById('langMenu').classList.toggle('open');}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.lang-wrap'))document.getElementById('langMenu')?.classList.remove('open');
+});
+
+function addMsg(role,text){
+  const msgs=document.getElementById('messages');
+  const row=document.createElement('div');row.className='msg-row '+(role==='user'?'user':'ai-row');
+  if(role==='ai'){const av=document.createElement('div');av.className='avatar av-ai';av.textContent='🤖';row.appendChild(av);}
+  const bub=document.createElement('div');bub.className='bubble '+(role==='user'?'user-b':'ai-b');
+  bub.textContent=text;row.appendChild(bub);
+  if(role==='user'){const av=document.createElement('div');av.className='avatar av-user';av.textContent='👤';row.appendChild(av);}
+  msgs.appendChild(row);
+  setTimeout(()=>{msgs.scrollTop=msgs.scrollHeight;},60);
+}
+function showTyping(){
+  const msgs=document.getElementById('messages');
+  const row=document.createElement('div');row.className='msg-row ai-row';row.id='typingRow';
+  const av=document.createElement('div');av.className='avatar av-ai';av.textContent='🤖';
+  const td=document.createElement('div');td.className='typing-dots';
+  td.innerHTML='<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+  row.appendChild(av);row.appendChild(td);msgs.appendChild(row);
+  setTimeout(()=>{msgs.scrollTop=msgs.scrollHeight;},60);
+}
+function hideTyping(){document.getElementById('typingRow')?.remove();}
+
+async function sendMsg(){
+  const inp=document.getElementById('aiInput');
+  const text=inp.value.trim();if(!text||aiTyping)return;
+  inp.value='';
+  addMsg('user',text);chatHistory.push({role:'user',content:text});
+  aiTyping=true;document.getElementById('sendBtn').disabled=true;showTyping();
+  const langInstr=selectedLang==='auto'?
+    'Detect the language from the user\'s message and reply in THAT SAME language. If Hindi/Hinglish, reply in Hinglish (mix of Hindi in English letters + English). Be natural and very friendly.':
+    `Always reply in language: ${selectedLang}. If hi, use Hinglish (Hindi written in English letters mixed with English). Be natural and friendly.`;
+  const sys=`You are COSMO AI, an enthusiastic and friendly space education assistant inside the Space Explorer app. You LOVE space and make it exciting!
+${langInstr}
+Keep responses conversational, warm, 2-5 sentences usually. Use emojis naturally. Focus on space topics — planets, stars, galaxies, black holes, space missions, astronauts, physics of space. If asked something unrelated, gently guide back to space.`;
+  try{
+    // Secure backend proxy call — API key frontend mein nahi hai
+    const resp=await fetch('/api/chat',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        system: sys,
+        messages: chatHistory
+      })
+    });
+    if(!resp.ok){
+      const errData=await resp.json().catch(()=>({}));
+      throw new Error(errData.error||`Server error: ${resp.status}`);
+    }
+    const data=await resp.json();
+    hideTyping();
+    const reply=data.reply||'Sorry, kuch error ho gaya. Dobara try karo!';
+    addMsg('ai',reply);chatHistory.push({role:'assistant',content:reply});
+    if(chatHistory.length>20)chatHistory=chatHistory.slice(-20);
+  }catch(err){
+    hideTyping();addMsg('ai','⚠️ Server error: '+err.message+'\nDobara try karo!');
+  }
+  aiTyping=false;document.getElementById('sendBtn').disabled=false;
+  document.getElementById('aiInput').focus();
+}
+</script>
+</body>
+</html>
