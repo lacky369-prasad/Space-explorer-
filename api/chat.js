@@ -1,49 +1,37 @@
 // ═══════════════════════════════════════
 // api/chat.js — Vercel Serverless Function
-// Securely proxies requests to Gemini API
 // ═══════════════════════════════════════
 
-const GEMINI_MODEL = "gemini-1.5-flash-latest";
-
 export default async function handler(req, res) {
-  // ── CORS Headers (fixes browser CORS error permanently) ──
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  // Preflight request handle karo
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
+  if (req.method === "OPTIONS") return res.status(200).end();
+  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  // Sirf POST allow karo
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
-  // API Key environment variable se lo (never expose in frontend!)
   const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
   if (!GEMINI_API_KEY) {
-    return res.status(500).json({ error: "GEMINI_API_KEY environment variable not set" });
+    return res.status(500).json({ error: "GEMINI_API_KEY not set" });
   }
 
   try {
     const { messages, system } = req.body;
 
     if (!messages || !Array.isArray(messages)) {
-      return res.status(400).json({ error: "Invalid request: messages array required" });
+      return res.status(400).json({ error: "messages array required" });
     }
 
-    // Gemini API call
+    // gemini-1.5-flash free tier pe kaam karta hai
     const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          system_instruction: system
-            ? { parts: [{ text: system }] }
-            : undefined,
+          ...(system && {
+            system_instruction: { parts: [{ text: system }] }
+          }),
           contents: messages.map((m) => ({
             role: m.role === "assistant" ? "model" : "user",
             parts: [{ text: m.content }],
@@ -56,15 +44,15 @@ export default async function handler(req, res) {
       }
     );
 
+    const data = await geminiRes.json();
+
     if (!geminiRes.ok) {
-      const errData = await geminiRes.json();
-      console.error("Gemini API error:", errData);
+      console.error("Gemini error:", JSON.stringify(data));
       return res.status(geminiRes.status).json({
-        error: errData?.error?.message || "Gemini API error",
+        error: data?.error?.message || "Gemini API error",
       });
     }
 
-    const data = await geminiRes.json();
     const reply =
       data.candidates?.[0]?.content?.parts?.[0]?.text ||
       "Sorry, kuch error ho gaya!";
@@ -72,6 +60,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ reply });
   } catch (err) {
     console.error("Proxy error:", err);
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: err.message });
   }
 }
